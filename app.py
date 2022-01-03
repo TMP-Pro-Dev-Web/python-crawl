@@ -1,3 +1,4 @@
+from logging import debug
 from selenium import webdriver
 from time import sleep
 from selenium.webdriver.common.keys import Keys
@@ -22,26 +23,28 @@ app.config["DEBUG"] = True
 
 @app.route('/api/v1/endpoint', methods=['GET'])
 def home():
-    json = {"code": 200, "message": "API Endpoint"}
-    return json
+    hello = {"code": 200, "message": "API Endpoint"}
+    return hello
 
-@app.route('/api/v1/resources/price', methods=['GET'])
+@app.route('/api/v1/resources/price', methods=['POST'])
 
 def api_all():
-    if(request.args.get('url')):
-        url = request.args.get('url')
+    data = "hello"
+    if request.method == "POST":
+        url = request.form['url']
         domain = tldextract.extract(url).domain
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_experimental_option('excludeSwitches', ['enable-automation']) 
         browser = webdriver.Chrome(PATH, options=options)
 
-        if domain == "taobao" or domain == "tmall" :
+        if domain == "taobao":
             # options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1')
             browser.get(url)
             browser.find_element_by_xpath("//*[@id=\"fm-login-id\"]").send_keys( LOGIN_NAME ); 
             browser.find_element_by_xpath("//*[@id=\"fm-login-password\"]").send_keys( LOGIN_PWD ); 
             browser.find_element_by_xpath("//*[@id=\"login-form\"]/div[4]/button").click()
+            
             try:
                 WebDriverWait(browser, 3).until(EC.presence_of_element_located((By.CLASS_NAME, 'tb-title')))
                 title = browser.find_element_by_class_name('tb-main-title').text
@@ -59,23 +62,42 @@ def api_all():
                 data = "Loading took too much time!"
             
         if domain == "1688":
-            url = request.args.get('url')
+            url = request.form['url']
             domain = tldextract.extract(url).domain
             options = webdriver.ChromeOptions()
             browser.get(url)
             try:
-                WebDriverWait(browser, 3).until(EC.presence_of_element_located((By.CLASS_NAME, 'tb-title')))
-                price = browser.find_element_by_class_name('tm-price').text
-                title = browser.find_element_by_class_name('tb-detail-hd').text
+                WebDriverWait(browser, 3).until(EC.presence_of_element_located((By.ID, 'mod-detail-title')))
+                price = browser.find_element_by_class_name('price-now').text
+                title = browser.find_element_by_css_selector('#mod-detail-title > h1').text
                 data = {
                     "price": price,
                     "title": title,
                     "domain": domain
                     # "src": src
-                    }    
+                }    
             except TimeoutException:
                 data = "Loading took too much time!"
             
+        if domain == "tmall":
+            url = request.form['url']
+            domain = tldextract.extract(url).domain
+            options = webdriver.ChromeOptions()
+            browser.get(url)
+            try:
+                WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.CLASS_NAME, 'baxia-dialog-close')))
+                browser.find_element_by_class_name("baxia-dialog-close").click()
+                price = browser.find_element_by_class_name('tm-price').text
+                title = browser.find_element_by_class_name('tb-detail-hd').text
+                print(title)
+                data = {
+                    "price": price,
+                    "title": title,
+                    "domain": domain
+                    # "src": src
+                }    
+            except TimeoutException:
+                data = "Loading took too much time!"
     return data
 
 app.run()
