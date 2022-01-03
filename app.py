@@ -21,7 +21,7 @@ app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 
-@app.route('/api/v1/endpoint', methods=['GET'])
+@app.route('/api/v1/endpoint', methods=['POST'])
 def home():
     hello = {"code": 200, "message": "API Endpoint"}
     return hello
@@ -89,7 +89,6 @@ def api_all():
                 browser.find_element_by_class_name("baxia-dialog-close").click()
                 price = browser.find_element_by_class_name('tm-price').text
                 title = browser.find_element_by_class_name('tb-detail-hd').text
-                print(title)
                 data = {
                     "price": price,
                     "title": title,
