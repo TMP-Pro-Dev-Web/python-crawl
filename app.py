@@ -12,7 +12,7 @@ import re
 from urllib.parse import urlparse
 import tldextract
 
-PATH = '/Users/tunguyen/Documents/Development/crawler/chromedriver'
+PATH = '/Users/nguyenbamang/production/python-crawl/chromedriver'
 LOGIN_NAME = "trinhhuuhuong911"
 LOGIN_PWD = "thhuong911"
 
@@ -20,16 +20,19 @@ app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 
-@app.route('/api/v1/endpoint', methods=['GET'])
+@app.route('/api/v1/endpoint', methods=['POST'])
 def home():
     json = {"code": 200, "message": "API Endpoint"}
     return json
 
-@app.route('/api/v1/resources/price', methods=['GET'])
+@app.route('/api/v1/resources/price', methods=['POST'])
 
 def api_all():
-    if(request.args.get('url')):
-        url = request.args.get('url')
+   # if(request.args.get('url')):
+        url = request.form['url']
+        print("----------------------------------------------------------------")
+        print(url)
+        print("----------------------------------------------------------------")
         domain = tldextract.extract(url).domain
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-blink-features=AutomationControlled")
@@ -76,7 +79,7 @@ def api_all():
             except TimeoutException:
                 data = "Loading took too much time!"
             
-    return data
+        return data
 
 app.run()
 
