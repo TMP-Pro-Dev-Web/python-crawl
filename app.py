@@ -34,6 +34,7 @@ def api_all():
         url = request.form['url']
         domain = tldextract.extract(url).domain
         options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_experimental_option('excludeSwitches', ['enable-automation']) 
         browser = webdriver.Chrome(PATH, options=options)
@@ -46,12 +47,13 @@ def api_all():
             browser.find_element_by_xpath("//*[@id=\"login-form\"]/div[4]/button").click()
             
             try:
-                WebDriverWait(browser, 3).until(EC.presence_of_element_located((By.CLASS_NAME, 'tb-title')))
+                WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.CLASS_NAME, 'tb-title')))
                 title = browser.find_element_by_class_name('tb-main-title').text
                 price = browser.find_elements_by_class_name('tb-rmb-num')
                 if len(price) > 2:
                     price = price[1].text
                 else: price = price[0].text
+                price = price.split(" - ")[0]
                 data = {
                     "price": price,
                     "title": title,
@@ -69,7 +71,7 @@ def api_all():
             try:
                 WebDriverWait(browser, 3).until(EC.presence_of_element_located((By.ID, 'mod-detail-title')))
                 price = browser.find_element_by_class_name('price-now').text
-                title = browser.find_element_by_css_selector('#mod-detail-title > h1').text
+                title = browser.find_element_by_css_selector('title-first-column').text
                 data = {
                     "price": price,
                     "title": title,
