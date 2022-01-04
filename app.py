@@ -12,6 +12,8 @@ import json
 import re
 from urllib.parse import urlparse
 import tldextract
+import queue
+
 
 PATH = '/Users/tunguyen/Documents/Development/crawler/chromedriver'
 LOGIN_NAME = "trinhhuuhuong911"
@@ -31,6 +33,7 @@ def home():
 def api_all():
     data = "hello"
     if request.method == "POST":
+        q = queue.Queue()
         url = request.form['url']
         domain = tldextract.extract(url).domain
         options = webdriver.ChromeOptions()
@@ -60,6 +63,7 @@ def api_all():
                     "domain": domain
                     # "src": src
                 }    
+
             except TimeoutException:
                 data = "Loading took too much time!"
             
@@ -99,11 +103,8 @@ def api_all():
                 }    
             except TimeoutException:
                 data = "Loading took too much time!"
+        
+        q.put(data)
     return data
 
 app.run()
-
-
-
-
-
